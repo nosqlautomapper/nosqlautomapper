@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NoSqlAutomapper
+namespace NoSqlAutomapper.Core
 {
-    class Program
+    public class TreePareser<TNode>
     {
-        static void Main(string[] args)
-        {
-        }
     }
 }

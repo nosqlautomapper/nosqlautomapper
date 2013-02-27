@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C99F10BE-F304-479D-8F96-FC8D41C23F07}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NoSqlAutomapper</RootNamespace>
     <AssemblyName>NoSqlAutomapper</AssemblyName>
@@ -31,8 +31,21 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AutoMapper">
+      <HintPath>..\packages\AutoMapper.2.2.1\lib\net40\AutoMapper.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Abstractions">
+      <HintPath>..\packages\RavenDB.Client.2.0.2261\lib\net40\Raven.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Client.Lightweight">
+      <HintPath>..\packages\RavenDB.Client.2.0.2261\lib\net40\Raven.Client.Lightweight.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -41,11 +54,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="AutomapperExtensions.cs" />
+    <Compile Include="Automapper\CustomMapingExpressionData.cs" />
+    <Compile Include="Automapper\CustomMappingExpression.cs" />
+    <Compile Include="Core\MappingInfoCache.cs" />
+    <Compile Include="Core\TypeResolver.cs" />
+    <Compile Include="IDBAdapter.cs" />
+    <Compile Include="Core\ITreeNode.cs" />
+    <Compile Include="Core\ITreeNodeVisitor.cs" />
+    <Compile Include="Core\MappingInfo.cs" />
+    <Compile Include="Core\SourceTreeNodeData.cs" />
+    <Compile Include="Core\SourceTreeNodeVisotor.cs" />
+    <Compile Include="Core\TreePareser.cs" />
+    <Compile Include="Exceptions\InitializationException.cs" />
+    <Compile Include="NoSqlMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Adapters\Raven\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
