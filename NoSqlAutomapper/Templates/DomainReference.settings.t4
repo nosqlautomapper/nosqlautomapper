@@ -1,0 +1,7 @@
+﻿<#+
+
+const string GeneratedNamespace = "DomainReference";
+const string GeneratedClassPostfix = "Ref";
+const string DomainNamespace = "NoSQLAutoMapper.Test.Domain";
+
+#>
