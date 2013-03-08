@@ -67,15 +67,29 @@
     <Compile Include="Core\SourceTreeNodeVisotor.cs" />
     <Compile Include="Core\TreePareser.cs" />
     <Compile Include="Exceptions\InitializationException.cs" />
+    <Compile Include="Metadata\ReferenceToAttribute.cs" />
     <Compile Include="NoSqlMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Templates\DomainReference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DomainReference.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Templates\DomainReference.settings.t4" />
+    <None Include="Templates\DomainReference.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DomainReference.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Adapters\Raven\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

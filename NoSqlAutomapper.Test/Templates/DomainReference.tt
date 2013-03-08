@@ -1,0 +1,233 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ Include File="DomainReference.settings.t4" #>
+<#@ assembly name="EnvDTE" #> 
+<#@ assembly name="EnvDTE80" #>
+<#@ assembly name="VSLangProj" #>
+<#@ assembly name="Microsoft.VisualStudio.Shell.Interop.8.0" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="EnvDTE80" #>
+<#@ import namespace="Microsoft.VisualStudio.Shell.Interop" #>
+<#@ import namespace=" Microsoft.VisualStudio.TextTemplating" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+using System.Collections.Generic;
+<#if (string.IsNullOrEmpty(DomainNamespace))
+{
+    Error("You mast set value for DomainNamespace parameter in DomainReference.settings.t4 file");
+}
+IList<DomainNamespaceInfo> namespaces =  FindClasses(this, DomainNamespace);
+#>
+
+<#foreach (var ns in namespaces) {#>
+namespace <#=GeneratedNamespace#><#=ns.Postfix#>
+{
+<#foreach (var ns1 in namespaces) {
+  if (ns1.Postfix != ns.Postfix) 
+  {
+#>
+    using <#=GeneratedNamespace#><#=ns1.Postfix#>;
+<#
+  } else {
+#>
+    using <#=DomainNamespace#><#=ns1.Postfix#>;
+<#
+  }
+}#>
+
+<#foreach (var _class in ns.Classes) {#>
+    public class <#=GetGeneratedClassName(_class.Name, GeneratedClassPostfix)#> : <#=_class.Name#>
+    {
+<#foreach (var property in _class.Properties) {#>
+<#if (property.IsCollection) {#>
+        public IEnumerable<<#=GetGeneratedClassName(property.TypeName, GeneratedClassPostfix)#>> <#=property.Name#> { get; set; }
+
+<#} else {#>
+        public <#=GetGeneratedClassName(property.TypeName, GeneratedClassPostfix)#> <#=property.Name#> { get; set; }
+
+<#}#>
+<#}#>
+    }
+<#}#>
+}
+<#}#>
+
+<#+
+
+class DomainNamespaceInfo
+{
+    public string Postfix { get; set; }
+
+    public IList<DomainClassInfo> Classes { get; set; }
+}
+
+class DomainClassInfo
+{
+    public CodeClass Class { get; set; }
+
+    public string Name { get; set; }
+
+    public IList<DomainPropertyInfo> Properties { get; set; }
+}
+
+class DomainPropertyInfo 
+{
+    public string Name { get; set; }
+
+    public string TypeName { get; set; }
+
+    public bool IsCollection { get; set; }
+}
+
+private DomainClassInfo GetDomainClassInfo(CodeClass codeClass)
+{
+    var res = new DomainClassInfo() {Class = codeClass, Name = codeClass.Name};
+    res.Properties = new List<DomainPropertyInfo>();
+
+    foreach (var member in codeClass.Members)
+    {
+        if (member is CodeProperty)
+        {
+            var property = member as CodeProperty;
+            foreach (var attr in property.Attributes)
+            {
+                if (attr is CodeAttribute)
+                {
+                    var codeAttr = attr as CodeAttribute;
+
+                    if (codeAttr.FullName == "NoSQLAutoMapper.Metadata.ReferenceToAttribute")
+                    {
+                        var info = new DomainPropertyInfo();
+
+                        info.IsCollection = IsEnumerableType(property.Type.CodeType);
+                        info.Name = property.Name;
+                        info.TypeName = ResolveTypeName(codeAttr.Value);
+
+                        if (info.TypeName == null)
+                        {
+                            Error(string.Format("Incorrect value for the attribute ReferenceTo: {}", codeAttr.Value));
+                        }
+                        else 
+                        {
+                            res.Properties.Add(info);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+private bool IsEnumerableType(CodeType type)
+{
+    if (type.FullName == "System.Collections.IEnumerable")
+    {
+        return true;
+    }
+
+    foreach (var element in type.Bases)
+    {
+        if (element is CodeType && IsEnumerableType(element as CodeType))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+private string ResolveTypeName(string attributeValue)
+{
+    if (string.IsNullOrEmpty(attributeValue))
+    {
+        return null;
+    }
+
+    if (attributeValue.StartsWith("typeof(") && attributeValue.EndsWith(")"))
+    {
+        var res = attributeValue.Substring(7, attributeValue.Length - 8);
+
+        var className = res.Split('.').Last();
+
+        return className;
+    }
+
+    return null;
+}
+
+private string GetGeneratedClassName(string originalName, string generatedClassPostfix)
+{
+    return originalName + generatedClassPostfix;
+}
+
+private List<DomainNamespaceInfo> FindClasses(TextTransformation tt, string nameSpace)
+{
+    var project = GetCurrentProject(tt);
+    return FindClasses(project.CodeModel.CodeElements, nameSpace).ToList();
+}
+
+private IEnumerable<DomainNamespaceInfo> FindClasses(CodeElements elements, string searchNamespace)
+{
+    var res = new List<DomainNamespaceInfo>();
+
+    foreach (CodeElement element in elements)
+    {       
+        if (element is CodeNamespace)
+        {
+            CodeNamespace ns = element as CodeNamespace;
+
+            if (ns.FullName.StartsWith(searchNamespace))
+            {
+                var info = new DomainNamespaceInfo() { Postfix = ns.FullName.Substring(searchNamespace.Length), Classes = new List<DomainClassInfo>() };
+
+                foreach (var c in ns.Members)
+                {
+                    if (c is CodeClass)
+                    {
+                        info.Classes.Add(GetDomainClassInfo(c as CodeClass));
+                    }
+                }
+
+                res.Add(info);    
+            }
+            
+            res.AddRange(FindClasses(ns.Members, searchNamespace));
+        }
+    }
+
+    return res;
+}
+
+private Project GetCurrentProject(TextTransformation tt) {
+    DTE dte;
+
+    // Get the DTE service from the host
+    var serviceProvider = Host as IServiceProvider;
+    dte = serviceProvider.GetService(typeof(SDTE)) as DTE;
+
+    // Fail if we couldn't get the DTE. This can happen when trying to run in TextTransform.exe
+    if (dte == null) {
+        Error("T4MVC can only execute through the Visual Studio host");
+    }
+
+    var project = GetProjectContainingT4File(dte);
+
+    if (project == null) {
+        Error("Could not find the VS Project containing the T4 file.");
+    }
+
+    return project;
+}
+
+private Project GetProjectContainingT4File(DTE dte) {
+    // Find the .tt file's ProjectItem
+    ProjectItem projectItem = dte.Solution.FindProjectItem(Host.TemplateFile);
+
+    return projectItem.ContainingProject;
+}
+#>

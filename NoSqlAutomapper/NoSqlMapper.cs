@@ -74,7 +74,9 @@ namespace NoSqlAutomapper
         {
             CheckInitialized();
             var info = cache.GetMappingInfo<TEntity, TModel>();
-            var entity = adapter.Query()
+            //var entity = adapter.Query();
+
+            return null;
         }
 
         private static void CheckInitialized()
