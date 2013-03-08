@@ -24,6 +24,6 @@ namespace NoSqlAutomapper.Test.Domain.Content.Blogs
         public String LanguigeId { get; set; }
 
         [ReferenceTo(typeof(Comment))]
-        public ICollection<Comment> CommentsIds { get; set; } 
+        public ICollection<String> CommentsIds { get; set; } 
     }
 }

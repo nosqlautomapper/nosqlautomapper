@@ -19,7 +19,6 @@ namespace NoSqlAutomapper.Test.Domain.Content
         [ReferenceTo(typeof(CMSPage))]
         public String CMSPageId { get; set; }
 
-        [ReferenceTo(typeof(MenuItem), ReferencePropertyName = "ChildItems")]
-        public ICollection<MenuItem> ChildMenuItemIds { get; set; }
+        public ICollection<MenuItem> ChildMenuItems { get; set; }
     }
 }

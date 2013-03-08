@@ -99,11 +99,6 @@ namespace DomainReference.Content
 			get { return NoSqlMapper.LoadEntity<CMSPageRef>(CMSPageId); } 
 		}
 
-        public IEnumerable<MenuItemRef> ChildMenuItem 
-		{ 
-			get { return NoSqlMapper.LoadEntityCollection<MenuItemRef>(ChildMenuItemIds); } 
-		}
-
     }
     public class CommentRef : Comment
     {
