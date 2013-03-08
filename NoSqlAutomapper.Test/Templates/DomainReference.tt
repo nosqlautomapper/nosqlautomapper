@@ -15,6 +15,7 @@
 <#@ import namespace="System.IO" #>
 <#@ import namespace="System.Linq" #>
 using System.Collections.Generic;
+using NoSqlAutomapper;
 <#if (string.IsNullOrEmpty(DomainNamespace))
 {
     Error("You mast set value for DomainNamespace parameter in DomainReference.settings.t4 file");
@@ -43,10 +44,16 @@ namespace <#=GeneratedNamespace#><#=ns.Postfix#>
     {
 <#foreach (var property in _class.Properties) {#>
 <#if (property.IsCollection) {#>
-        public IEnumerable<<#=GetGeneratedClassName(property.TypeName, GeneratedClassPostfix)#>> <#=property.Name#> { get; set; }
+        public IEnumerable<<#=GetGeneratedClassName(property.TypeName, GeneratedClassPostfix)#>> <#=ResolvePropertyName(property.Name, true)#> 
+		{ 
+			get { return NoSqlMapper.LoadEntityCollection<<#=GetGeneratedClassName(property.TypeName, GeneratedClassPostfix)#>>(<#=property.Name#>); } 
+		}
 
 <#} else {#>
-        public <#=GetGeneratedClassName(property.TypeName, GeneratedClassPostfix)#> <#=property.Name#> { get; set; }
+        public <#=GetGeneratedClassName(property.TypeName, GeneratedClassPostfix)#> <#=ResolvePropertyName(property.Name, false)#> 
+		{ 
+			get { return NoSqlMapper.LoadEntity<<#=GetGeneratedClassName(property.TypeName, GeneratedClassPostfix)#>>(<#=property.Name#>); } 
+		}
 
 <#}#>
 <#}#>
@@ -98,17 +105,17 @@ private DomainClassInfo GetDomainClassInfo(CodeClass codeClass)
                 {
                     var codeAttr = attr as CodeAttribute;
 
-                    if (codeAttr.FullName == "NoSQLAutoMapper.Metadata.ReferenceToAttribute")
+                    if (codeAttr.FullName == "NoSqlAutomapper.Metadata.ReferenceToAttribute")
                     {
                         var info = new DomainPropertyInfo();
 
                         info.IsCollection = IsEnumerableType(property.Type.CodeType);
                         info.Name = property.Name;
-                        info.TypeName = ResolveTypeName(codeAttr.Value);
+                        info.TypeName = ResolveTypeName(codeAttr);
 
                         if (info.TypeName == null)
                         {
-                            Error(string.Format("Incorrect value for the attribute ReferenceTo: {}", codeAttr.Value));
+                            Error(string.Format("Incorrect value for the attribute ReferenceTo: {0}", codeAttr.Value));
                         }
                         else 
                         {
@@ -141,24 +148,48 @@ private bool IsEnumerableType(CodeType type)
     return false;
 }
 
-private string ResolveTypeName(string attributeValue)
+private string ResolveTypeName(CodeAttribute attribute)
 {
+	var attributeValue = attribute.Value;
+
     if (string.IsNullOrEmpty(attributeValue))
     {
         return null;
     }
+	
+	attributeValue = attributeValue.Trim();
 
-    if (attributeValue.StartsWith("typeof(") && attributeValue.EndsWith(")"))
+    if (attributeValue.StartsWith("typeof(") && attributeValue.Contains(")"))
     {
-        var res = attributeValue.Substring(7, attributeValue.Length - 8);
+		var prefixLen = "typeof(".Length;
+
+        var res = attributeValue.Substring(prefixLen, attributeValue.IndexOf(")") - prefixLen);
 
         var className = res.Split('.').Last();
+
+		className = className.Trim();
 
         return className;
     }
 
     return null;
 }
+
+private string ResolvePropertyName(string propertyName, bool isCollection)
+{
+	if (!isCollection && propertyName.ToLower().EndsWith(DomainSingleReferencePostfix.ToLower()))
+    {
+		propertyName = propertyName.Substring(0, propertyName.Length - DomainSingleReferencePostfix.Length);
+	}
+
+	if (isCollection && propertyName.ToLower().EndsWith(DomainMultipleReferencePostfix.ToLower()))
+    {
+		propertyName = propertyName.Substring(0, propertyName.Length - DomainMultipleReferencePostfix.Length);
+	}
+
+	return propertyName;
+}
+
 
 private string GetGeneratedClassName(string originalName, string generatedClassPostfix)
 {
@@ -201,7 +232,7 @@ private IEnumerable<DomainNamespaceInfo> FindClasses(CodeElements elements, stri
     }
 
     return res;
-}
+} 
 
 private Project GetCurrentProject(TextTransformation tt) {
     DTE dte;

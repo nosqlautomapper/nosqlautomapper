@@ -4,6 +4,6 @@ const string GeneratedNamespace = "DomainReference";
 const string GeneratedClassPostfix = "Ref";
 const string DomainSingleReferencePostfix = "id";
 const string DomainMultipleReferencePostfix = "ids";
-const string DomainNamespace = "NoSQLAutoMapper.Test.Domain";
+const string DomainNamespace = "NoSqlAutomapper.Test.Domain";
 
 #>

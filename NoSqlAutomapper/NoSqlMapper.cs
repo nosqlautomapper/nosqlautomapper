@@ -69,6 +69,15 @@ namespace NoSqlAutomapper
             return entity;
         }
 
+        public static TEntity LoadEntity<TEntity>(String id)
+        {
+            return default(TEntity);
+        }
+
+        public static IEnumerable<TEntity> LoadEntityCollection<TEntity>(IEnumerable<String> id)
+        {
+            return new List<TEntity>();
+        }
 
         public static IQueryable<TModel> Query<TEntity, TModel>()
         {

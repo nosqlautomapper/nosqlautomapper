@@ -21,6 +21,6 @@ namespace NoSqlAutomapper.Test.Domain.ECommerce
         public String ShopId { get; set; }
 
         [ReferenceTo(typeof(ProductCategory))]
-        public ICollection<ProductCategory> CategoriesIds { get; set; } 
+        public ICollection<String> CategoriesIds { get; set; } 
     }
 }
