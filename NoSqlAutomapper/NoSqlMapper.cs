@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using NoSqlAutomapper.Core;
 using NoSqlAutomapper.Exceptions;
 
@@ -83,16 +84,16 @@ namespace NoSqlAutomapper
         {
             CheckInitialized();
             var info = cache.GetMappingInfo<TEntity, TModel>();
-            //var entity = adapter.Query();
+            var query = adapter.Query(info);
 
-            return null;
+            return query.Project().To<TModel>();
         }
 
         private static void CheckInitialized()
         {
             if (!initialized)
             {
-                throw new InitializationException("NoSqlAutompper is not initialize, you should call method Init() first.");
+                throw new InitializationException("NoSqlAutompper is not initialized, you should call method Init() first.");
             }
         }
     }

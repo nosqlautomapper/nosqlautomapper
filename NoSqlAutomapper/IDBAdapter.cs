@@ -9,6 +9,10 @@ namespace NoSqlAutomapper
     {
         TEntity LoadWithIncludes<TEntity, TModel>(String id, MappingInfo<TEntity, TModel> mappingInfo);
 
-        IQueryable<Object> Query<TEntity, TModel>(MappingInfo<TEntity, TModel> mappingInfo);
+        TEntity Load<TEntity>(String id);
+
+        IEnumerable<TEntity> Load<TEntity>(IEnumerable<String> ids);
+
+        IQueryable<dynamic> Query<TEntity, TModel>(MappingInfo<TEntity, TModel> mappingInfo);
     }
 }

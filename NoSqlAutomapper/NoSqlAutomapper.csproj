@@ -54,10 +54,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adapters\Raven\IndexBuilder.cs" />
+    <Compile Include="Adapters\Raven\RavenDbAdapter.cs" />
     <Compile Include="AutomapperExtensions.cs" />
     <Compile Include="Automapper\CustomMapingExpressionData.cs" />
     <Compile Include="Automapper\CustomMappingExpression.cs" />
     <Compile Include="Core\MappingInfoCache.cs" />
+    <Compile Include="Core\RelatedCollectionInfo.cs" />
     <Compile Include="Core\TypeResolver.cs" />
     <Compile Include="IDBAdapter.cs" />
     <Compile Include="Core\ITreeNode.cs" />
@@ -85,9 +88,7 @@
       <LastGenOutput>DomainReference.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Adapters\Raven\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>

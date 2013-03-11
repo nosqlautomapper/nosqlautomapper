@@ -1,6 +1,7 @@
 ﻿using System;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NoSqlAutomapper.Adapters.Raven;
 using Raven.Abstractions.Data;
 using Raven.Client;
 using Raven.Client.Document;
@@ -12,7 +13,7 @@ namespace NoSqlAutomapper.Test.DomainTests
     {
         private static IDocumentStore Database { get; set; }
 
-        protected IDocumentSession Session { get; set; }
+        protected static IDocumentSession Session { get; set; }
 
         protected IConfiguration Configuration { get; set; }
 
@@ -21,6 +22,8 @@ namespace NoSqlAutomapper.Test.DomainTests
         {
             Database = new DocumentStore() { ConnectionStringName = "defaultDatabase", DefaultDatabase = "Test"};
             Database.Initialize();
+
+            NoSqlMapper.Init(new RavenDbAdapter(() => Session, Database));
         }
 
         [AssemblyCleanup]
@@ -44,6 +47,8 @@ namespace NoSqlAutomapper.Test.DomainTests
                 new IndexQuery(),
                 allowStale: false
             );
+
+            Session.Dispose();
         }
     }
 }
