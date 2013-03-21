@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NoSqlAutomapper.Core;
+using Raven.Abstractions.Extensions;
 using Raven.Client;
 using Raven.Client.Document;
 
@@ -30,15 +31,15 @@ namespace NoSqlAutomapper.Adapters.Raven
         {
             ILoaderWithInclude<Object> loader = null;
 
-            foreach (var info in mappingInfo.RelatedCollections.Where(x => x.ContainingEntityType == typeof(TEntity)))
+            foreach (var info in mappingInfo.TransitionNodes.Where(x => x.ParentNode == null))
             {
                 if (loader == null)
                 {
-                    loader = session().Include(info.PropertyName);
+                    loader = session().Include(info.PropertyIdPath);
                 }
                 else
                 {
-                    loader = loader.Include(info.PropertyName);
+                    loader = loader.Include(info.PropertyIdPath);
                 }
             }
 
@@ -70,7 +71,7 @@ namespace NoSqlAutomapper.Adapters.Raven
                 {
                     if (!existedIndexes.Contains(builder.IndexName))
                     {
-                        documentStore.DatabaseCommands.PutIndex(builder.IndexName, builder.BuildIndex(), true);
+                        documentStore.DatabaseCommands.PutIndex(builder.IndexName, builder.BuildIndex(mappingInfo), true);
                         existedIndexes.Add(builder.IndexName);
                     }
                 }

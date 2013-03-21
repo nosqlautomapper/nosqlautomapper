@@ -11,6 +11,8 @@ using NoSqlAutomapper.Test.Domain.Content;
 using NoSqlAutomapper.Test.Domain.Content.Blogs;
 using NoSqlAutomapper.Test.Domain.Users;
 using Raven.Abstractions.Linq;
+using Raven.Client;
+using Raven.Client.Linq;
 
 namespace NoSqlAutomapper.Test.DomainTests
 {
@@ -39,6 +41,17 @@ namespace NoSqlAutomapper.Test.DomainTests
             public String UserName { get; set; }
         }
 
+        public class UserDto
+        {
+            public String Login { get; set; }
+
+            public String Email1 { get; set; }
+
+            public String Hash { get; set; }
+
+            public String Salt { get; set; }
+        }
+
         [TestMethod]
         public void MapBlogPosts()
         {
@@ -61,11 +74,7 @@ namespace NoSqlAutomapper.Test.DomainTests
             Session.Store(post1);
             Session.SaveChanges();
 
-            var query = Session.Query<object>("Test").ToList();
-
-
-
-            /*Configuration.CreateMap<BlogPostRef, BlogPostDTO>()
+            Configuration.CreateMap<BlogPostRef, BlogPostDTO>()
                          .ForMember(x => x.AuthorName, opt => opt.MapFrom(x => x.Author.Login));
 
             Configuration.CreateMap<CommentRef, CommentDTO>()
@@ -78,7 +87,7 @@ namespace NoSqlAutomapper.Test.DomainTests
             Assert.AreEqual(postDto.AuthorName, user1.Login);
             Assert.AreEqual(postDto.Comments.Count, 2);
             Assert.AreEqual(postDto.Comments[0].Content, comment1.Content);
-            Assert.AreEqual(postDto.Comments[0].UserName, user2.Login);*/
+            Assert.AreEqual(postDto.Comments[0].UserName, user2.Login);
         }
     }
 }

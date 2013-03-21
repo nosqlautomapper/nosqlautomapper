@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NoSqlAutomapper.Core
+namespace NoSqlAutomapper
 {
-    public class TreePareser<TNode>
+    public static class Constants
     {
+        public const String PropertyPathCollectionSeparator = ",";
     }
 }

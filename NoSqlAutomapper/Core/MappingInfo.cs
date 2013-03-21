@@ -8,10 +8,8 @@ namespace NoSqlAutomapper.Core
 {
     public class MappingInfo<TEntity, TModel>
     {
-        public Type ReferenceType { get; set; }
+        public IList<TransitionNodeInfo> TransitionNodes { get; set; }
 
-        public ITreeNode<SourceTreeNodeData> SourceTree { get; set; }
-
-        public IList<RelatedCollectionInfo> RelatedCollections { get; set; } 
+        public IList<TreeNode> ModelProperties { get; set; }
     }
 }
